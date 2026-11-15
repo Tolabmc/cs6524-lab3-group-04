@@ -7,3 +7,7 @@
 *.log
 *.run.xml
 *.pdf
+
+# Python / IDE
+__pycache__/
+.idea/

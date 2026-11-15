@@ -1,0 +1,24 @@
+# Video b: static camera, the figurine spins on a plate. Only points on the figurine
+# move rigidly with it, so features and dense points are restricted to its mask
+# (background, moving people and the hand would otherwise corrupt E).
+features:
+  method: klt
+  mask: object
+  n_features: 2000
+  ransac_px: 1.0
+sfm:
+  init_gap: 4
+  min_track_len: 3
+  min_gap: 2
+  min_parallax_deg: 1.0
+  split_px: 2.0
+  ba_every: 5
+  ba_window: 10
+dense:
+  gap: 4
+  step: 2
+  roi_margin: 12
+  min_parallax_deg: 2.0
+  voxel_frac: 0.004
+  min_pairs: 3
+  fb_px: 0.5
