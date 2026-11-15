@@ -2,7 +2,8 @@
 
     python -m mypylibs.report_figures [results_dir]     # default: out
 
-Writes assets/latex/step7_sensitivity.png and assets/latex/step6_clouds.png.
+Writes assets/latex/step7_sensitivity.png, assets/latex/step6_clouds.png and
+assets/latex/results_table.tex.
 """
 
 import csv
@@ -85,6 +86,24 @@ def clouds(results, plt, names=('a_10u', 'b_10u')):
     plt.close(fig)
 
 
+def table(rows):
+    """LaTeX table of the 12 runs -> assets/latex/results_table.tex (\\input it in the report)."""
+    order = {(v, u, f): k for k, (v, u, f) in enumerate(
+        (v, u, f) for v in 'ab' for u in ('True', 'False') for f in ('0.8', '1.0', '1.2'))}
+    rows = sorted(rows, key=lambda r: order.get((r['video'], r['undistorted'], r['focal_factor']), 99))
+    lines = [r'\begin{table}[t]', r'\caption{Results of the 12 runs (u: undistorted, d: distorted).}',
+             r'\label{tab:results}', r'\centering\scriptsize\setlength{\tabcolsep}{3pt}',
+             r'\begin{tabular}{lrrrrrr}', r'\hline',
+             r'Run & Swept ($^\circ$) & Gap & BA (px) & PnP fail & Sparse & Dense \\', r'\hline']
+    for r in rows:
+        lines.append(f"\\texttt{{{r['run'].replace('_', chr(92) + '_')}}} & {float(r['swept_deg']):.0f} & "
+                     f"{float(r['closure_gap']):.2f} & {float(r['ba_err_px']):.2f} & {r['pnp_fallbacks']} & "
+                     f"{r['sparse_points']} & {r['dense_points']} \\\\")
+    lines += [r'\hline', r'\end{tabular}', r'\end{table}']
+    with open(opath.join(OUT_DIR, 'results_table.tex'), 'w') as f:
+        f.write('\n'.join(lines) + '\n')
+
+
 def main(results='out'):
     import matplotlib
     matplotlib.use('Agg')
@@ -94,6 +113,7 @@ def main(results='out'):
         rows = list(csv.DictReader(f))
     sensitivity(rows, plt)
     clouds(results, plt)
+    table(rows)
 
 
 if __name__ == '__main__':
